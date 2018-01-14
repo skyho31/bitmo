@@ -34,7 +34,7 @@ function makeCurruncyInfo(cb) {
     var currObj = JSON.parse(decodeURIComponent(data))[0];
     currArr = Object.keys(currObj);
 
-    for (var i = 0; i < currArr.length - 1; i++) {
+    for (var i = 0; i < currArr.length; i++) {
       currencyInfo[currArr[i]] = new Currency(currArr[i], currObj[currArr[i]]);
     }
 
@@ -47,7 +47,7 @@ function checkTicker(){
     try{
       var result = JSON.parse(body);
 
-      for (var i = 0; i < currArr.length - 1; i++){
+      for (var i = 0; i < currArr.length; i++){
         var currency = currencyInfo[currArr[i]];
         var key = currency.key;
         currency.buyPrice.push(Number(result.data[key].buy_price));
@@ -107,7 +107,7 @@ function checkRecentTransaction(currency) {
 
 
 function checkStatus(){
-  for (var i = 0; i < currArr.length - 1; i++){
+  for (var i = 0; i < currArr.length; i++){
     checkRecentTransaction(currencyInfo[currArr[i]]);
   }
 }
@@ -136,7 +136,7 @@ function readData(){
 }
 
 eventEmitter.on('collected', function() {
-  if (recentCount == currArr.length - 1 && tickCount == 1) {
+  if (recentCount >= currArr.length && tickCount == 1) {
     recentCount = 0;
     tickCount = 0;
     console.log(stack + ' data Collected');
