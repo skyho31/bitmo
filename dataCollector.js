@@ -6,6 +6,7 @@ var eventEmitter = new events.EventEmitter();
 
 var currencyInfo = {};
 var currArr;
+var recentCount = 0;
 var tickCount = 0;
 var stack = 0;
 var defaultValue = 0;
@@ -13,8 +14,9 @@ var defaultStack = 0;
 var now;
 
 
-var url = 'https://crix-api-endpoint.upbit.com/v1/crix/trades/ticks?code=CRIX.UPBIT.KRW-{coinname}&count=3';
-const intervalTime = 3000;
+var recentUrl = 'https://api.bithumb.com/public/recent_transactions/{coinname}';
+var tickerUrl = 'https://api.bithumb.com/public/ticker/all';
+const intervalTime = 5000;
 
 function Currency(key, name) {
   this.name = name;
@@ -23,6 +25,8 @@ function Currency(key, name) {
   this.histogram = [];
   this.maxMacd = 0;
   this.initTrade = false;
+  this.buyPrice = [];
+  this.sellPrice = [];
 }
 
 function makeCurruncyInfo(cb) {
@@ -37,32 +41,64 @@ function makeCurruncyInfo(cb) {
     cb();
   });
 }
+function checkTicker(){
 
-function checkTicker(currency) {
+  request(tickerUrl, function(err, res, body){
+    try{
+      var result = JSON.parse(body);
+
+      for (var i = 0; i < currArr.length - 1; i++){
+        var currency = currencyInfo[currArr[i]];
+        var key = currency.key;
+        currency.buyPrice.push(Number(result.data[key].buy_price));
+        currency.sellPrice.push(Number(result.data[key].sell_price));
+      }
+
+      checkStatus();
+      tickCount++;
+    } catch(e){
+      tickCount++;
+      console.log(e);
+    }
+  })
+}
+
+function checkRecentTransaction(currency) {
   var key = currency.key;
   var name = currency.name;
   var price = currency.price;
-  var localUrl = url.replace('{coinname}', key);
+  var localUrl = recentUrl.replace('{coinname}', key.toLowerCase());
+  var buyPrice = currency.buyPrice;
+  var sellPrice = currency.sellPrice;
+  var dataSet;
   var curPrice;
-  var _histogram;
-  var marketPrice = 0;
 
   request(localUrl, function(err, res, body) {
     try {
       var result = JSON.parse(body);
-      curPrice = result[0].tradePrice;
+      // api 변경 시 바꾸어줘야함
+      curPrice = Number(result.data[0].price);
       price.push(curPrice);
 
-      stack = price.length;
-      tickCount++;
+      dataSet = {
+        price: price,
+        buyPrice: buyPrice,
+        sellPrice: sellPrice
+      }
+
+      if(key == 'BTC'){
+        stack = price.length;
+      }
+      
+      recentCount++;
       defaultStack++;
       eventEmitter.emit('collected');
-      fs.writeFile('./logs/' +  key + '.txt', JSON.stringify({price: price}), 'utf8', (err) => {
+      fs.writeFile('./logs/' +  key + '.txt', JSON.stringify(dataSet), 'utf8', (err) => {
         if(err) console.log(err)
       });
       
     } catch (e) {
-      tickCount++;
+      recentCount++;
       console.log('restart server........')
       eventEmitter.emit('collected');
     }
@@ -72,7 +108,7 @@ function checkTicker(currency) {
 
 function checkStatus(){
   for (var i = 0; i < currArr.length - 1; i++){
-    checkTicker(currencyInfo[currArr[i]]);
+    checkRecentTransaction(currencyInfo[currArr[i]]);
   }
 }
 
@@ -83,7 +119,11 @@ function readData(){
     var filename = currencyInfo[key].key + '.txt';
     i++;
     try {
-      currencyInfo[key].price = JSON.parse(log.read(filename)).price.slice(0);
+      var result = JSON.parse(log.read(filename))
+      currencyInfo[key].price = result.price.slice(0);
+      currencyInfo[key].buyPrice = result.buyPrice.slice(0);
+      currencyInfo[key].sellPrice = result.sellPrice.slice(0);
+
       console.log('read complete', filename, '(', i , '/', currArr.length, ')');
     } catch(e) {
       console.log(filename, 'log is not created yet.', '(', i , '/', currArr.length, ')');
@@ -92,15 +132,16 @@ function readData(){
 
 
   console.log('Data load Complete');
-  checkStatus();
+  checkTicker();
 }
 
 eventEmitter.on('collected', function() {
-  if (tickCount == currArr.length - 1) {
+  if (recentCount == currArr.length - 1 && tickCount == 1) {
+    recentCount = 0;
     tickCount = 0;
     console.log(stack + ' data Collected');
     setTimeout(function(){
-      checkStatus()
+      checkTicker()
     }, intervalTime);
   }
 });
