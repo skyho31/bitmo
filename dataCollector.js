@@ -57,8 +57,10 @@ function checkTicker(){
       checkStatus();
       tickCount++;
     } catch(e){
-      tickCount++;
+      console.log(body);
       console.log(e);
+      checkStatus();
+      tickCount++;
     }
   })
 }
