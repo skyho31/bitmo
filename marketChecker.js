@@ -1,9 +1,15 @@
 var request = require('request');
 var fs = require('fs');
-var defaultCap = 0;
 var date = new Date().getTime();
-var defaultStack = 0;
 var marketurl;
+var currencyInfo = {};
+
+function Currency(key){
+  this.key = key;
+  this.price = 0;
+  this.cap = 0;
+  this.cap_price = 0;
+}
 
 function getMarketInfo(){
 
@@ -17,33 +23,44 @@ function getMarketInfo(){
       var totalCap = 0;
     
       for(var i = 0; i < dataArr.length; i++){
-        var marketCap = dataArr[i].market_cap_usd;
-        totalCap += Number(marketCap);
+        var key = dataArr[i].symbol;
+        currencyInfo[key].cap = Number(dataArr[i].market_cap_usd);
       }
+
     
-      if(defaultStack == 0){
-        defaultCap = totalCap;
-      }
-    
-      var dataSet = {
-        default : defaultCap,
-        totalCap : totalCap,
-        changeRate : ((totalCap/defaultCap - 1) * 100).toFixed(2)
-      }
-    
-      fs.writeFile('./logs/' + date + '.txt', JSON.stringify(dataSet), function(){
-        console.log(`${curDate} - [defaultCap] : ${defaultCap} [currentCap] : ${totalCap} [changeRate] : ${dataSet.changeRate}%`);
-        defaultStack++;
+      fs.writeFile('./logs/alphaCap.json', JSON.stringify(currencyInfo), function(){
+        console.log(`${curDate} - collected`);
       })
+
     } catch(e){
       console.log(e);
     }
   })
 }
 
+function getReadCurrency(cb){
+  fs.readFile('currency.json', 'utf8', function(err, data){
+    if(err) console.log(err);
+    var currObj = JSON.parse(decodeURIComponent(data))[0];
+    currArr = Object.keys(currObj);
+
+    for (var i = 0; i < currArr.length; i++) {
+      currencyInfo[currArr[i]] = new Currency(currArr[i]);
+    }
+
+    currencyInfo.startTime = date;
+    
+    cb();
+  })
+
+  
+}
+
 module.exports = {
   init: function(){
-    getMarketInfo()
+    getReadCurrency(function(){
+      getMarketInfo()
+    });
     setInterval(function(){
       getMarketInfo()
     },  60 * 1000);
