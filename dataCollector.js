@@ -25,8 +25,8 @@ function Currency(key, name) {
   this.histogram = [];
   this.maxMacd = 0;
   this.initTrade = false;
-  this.buyPrice = [];
-  this.sellPrice = [];
+  this.buyPrice = 0;
+  this.sellPrice = 0;
 }
 
 function makeCurruncyInfo(cb) {
@@ -50,8 +50,8 @@ function checkTicker(){
       for (var i = 0; i < currArr.length; i++){
         var currency = currencyInfo[currArr[i]];
         var key = currency.key;
-        currency.buyPrice.push(Number(result.data[key].buy_price));
-        currency.sellPrice.push(Number(result.data[key].sell_price));
+        currency.buyPrice = Number(result.data[key].buy_price);
+        currency.sellPrice = (result.data[key].sell_price);
       }
 
       checkStatus();
@@ -82,6 +82,10 @@ function checkRecentTransaction(currency) {
       curPrice = Number(result.data[0].price);
       price.push(curPrice);
 
+      if(price.length > 500){
+        price.unshift();
+      }
+
       dataSet = {
         price: price,
         buyPrice: buyPrice,
@@ -89,7 +93,11 @@ function checkRecentTransaction(currency) {
       }
 
       if(key == 'BTC'){
-        stack = price.length;
+        if(stack > 500){
+          stack++;
+        } else {
+          stack = price.length;
+        }
       }
       
       recentCount++;
