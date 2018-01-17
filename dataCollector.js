@@ -51,7 +51,7 @@ function checkTicker(){
         var currency = currencyInfo[currArr[i]];
         var key = currency.key;
         currency.buyPrice = Number(result.data[key].buy_price);
-        currency.sellPrice = (result.data[key].sell_price);
+        currency.sellPrice = Number(result.data[key].sell_price);
       }
 
       checkStatus();
@@ -83,7 +83,7 @@ function checkRecentTransaction(currency) {
       price.push(curPrice);
 
       if(price.length > 500){
-        price.unshift();
+        var temp = price.shift();
       }
 
       dataSet = {
@@ -93,7 +93,7 @@ function checkRecentTransaction(currency) {
       }
 
       if(key == 'BTC'){
-        if(stack > 500){
+        if(stack >= 500){
           stack++;
         } else {
           stack = price.length;
