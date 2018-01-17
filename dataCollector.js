@@ -131,8 +131,8 @@ function readData(){
     try {
       var result = JSON.parse(log.read(filename))
       currencyInfo[key].price = result.price.slice(0);
-      currencyInfo[key].buyPrice = result.buyPrice.slice(0);
-      currencyInfo[key].sellPrice = result.sellPrice.slice(0);
+      currencyInfo[key].buyPrice = result.buyPrice;
+      currencyInfo[key].sellPrice = result.sellPrice;
 
       console.log('read complete', filename, '(', i , '/', currArr.length, ')');
     } catch(e) {
