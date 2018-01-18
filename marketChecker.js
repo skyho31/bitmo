@@ -26,6 +26,7 @@ function getMarketInfo(){
         var key = dataArr[i].symbol;
         currencyInfo[key].cap = Number(dataArr[i].market_cap_usd);
       }
+      currencyInfo.timestamp = curDate;
 
     
       fs.writeFile('./logs/alphaCap.json', JSON.stringify(currencyInfo), function(){
