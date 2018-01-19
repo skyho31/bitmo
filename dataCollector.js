@@ -75,44 +75,51 @@ function checkRecentTransaction(currency) {
   var dataSet;
   var curPrice;
 
-  request(localUrl, function(err, res, body) {
-    try {
-      var result = JSON.parse(body);
-      // api 변경 시 바꾸어줘야함
-      curPrice = Number(result.data[0].price);
-      price.push(curPrice);
+  try {
+    request(localUrl, function(err, res, body) {
+      try {
+        var result = JSON.parse(body);
+        // api 변경 시 바꾸어줘야함
+        curPrice = Number(result.data[0].price);
+        price.push(curPrice);
 
-      if(price.length > 1000){
-        var temp = price.shift();
-      }
-
-      dataSet = {
-        price: price,
-        buyPrice: buyPrice,
-        sellPrice: sellPrice
-      }
-
-      if(key == 'BTC'){
-        if(stack >= 1000){
-          stack++;
-        } else {
-          stack = price.length;
+        if(price.length > 1000){
+          var temp = price.shift();
         }
+
+        dataSet = {
+          price: price,
+          buyPrice: buyPrice,
+          sellPrice: sellPrice
+        }
+
+        if(key == 'BTC'){
+          if(stack >= 1000){
+            stack++;
+          } else {
+            stack = price.length;
+          }
+        }
+        
+        recentCount++;
+        defaultStack++;
+        eventEmitter.emit('collected');
+        fs.writeFile('./logs/' +  key + '.txt', JSON.stringify(dataSet), 'utf8', (err) => {
+          if(err) console.log(err)
+        });
+        
+      } catch (e) {
+        recentCount++;
+        console.log('restart server........')
+        eventEmitter.emit('collected');
       }
-      
-      recentCount++;
-      defaultStack++;
-      eventEmitter.emit('collected');
-      fs.writeFile('./logs/' +  key + '.txt', JSON.stringify(dataSet), 'utf8', (err) => {
-        if(err) console.log(err)
-      });
-      
-    } catch (e) {
-      recentCount++;
-      console.log('restart server........')
-      eventEmitter.emit('collected');
-    }
-  });
+    });
+  }
+  catch(e){
+    recentCount++;
+    console.log('restart server........')
+    eventEmitter.emit('collected');
+  }
 }
 
 
