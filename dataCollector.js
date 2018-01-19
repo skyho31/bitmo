@@ -16,7 +16,7 @@ var now;
 
 var recentUrl = 'https://api.bithumb.com/public/recent_transactions/{coinname}';
 var tickerUrl = 'https://api.bithumb.com/public/ticker/all';
-const intervalTime = 5000;
+const intervalTime = 2 * 1000;
 
 function Currency(key, name) {
   this.name = name;
@@ -82,7 +82,7 @@ function checkRecentTransaction(currency) {
       curPrice = Number(result.data[0].price);
       price.push(curPrice);
 
-      if(price.length > 500){
+      if(price.length > 1000){
         var temp = price.shift();
       }
 
@@ -93,7 +93,7 @@ function checkRecentTransaction(currency) {
       }
 
       if(key == 'BTC'){
-        if(stack >= 500){
+        if(stack >= 1000){
           stack++;
         } else {
           stack = price.length;
