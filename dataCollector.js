@@ -16,7 +16,7 @@ var now;
 
 var recentUrl = 'https://api.bithumb.com/public/recent_transactions/{coinname}';
 var tickerUrl = 'https://api.bithumb.com/public/ticker/all';
-const intervalTime = 2 * 1000;
+const intervalTime = 3 * 1000;
 
 function Currency(key, name) {
   this.name = name;

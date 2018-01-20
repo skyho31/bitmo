@@ -64,6 +64,6 @@ module.exports = {
     });
     setInterval(function(){
       getMarketInfo()
-    },  10 * 1000);
+    },  9 * 1000);
   }
 }
