@@ -1,3 +1,5 @@
+import { clearTimeout } from 'timers';
+
 var fs = require('fs');
 var log = require('./logger');
 var request = require('request');
@@ -16,7 +18,7 @@ var now;
 
 var recentUrl = 'https://api.bithumb.com/public/recent_transactions/{coinname}';
 var tickerUrl = 'https://api.bithumb.com/public/ticker/all';
-const intervalTime = 3 * 1000;
+const intervalTime = 60 * 1000;
 
 function Currency(key, name) {
   this.name = name;
@@ -152,12 +154,25 @@ function readData(){
   checkTicker();
 }
 
+function countDown(time){
+  var count = time;
+  
+  timer = setInterval(function(){
+    time--;
+    console.log(time);
+  }, 1000);
+  if(count == 0){
+    clearTimeout(timer);
+  }
+}
+
 eventEmitter.on('collected', function() {
   if (recentCount >= currArr.length && tickCount == 1) {
     recentCount = 0;
     tickCount = 0;
     console.log(stack + ' data Collected');
     setTimeout(function(){
+      countDown();
       checkTicker()
     }, intervalTime);
   }
