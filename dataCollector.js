@@ -1,5 +1,3 @@
-import { clearTimeout } from 'timers';
-
 var fs = require('fs');
 var log = require('./logger');
 var request = require('request');
@@ -13,12 +11,14 @@ var tickCount = 0;
 var stack = 0;
 var defaultValue = 0;
 var defaultStack = 0;
+var timer;
 var now;
+var common;
 
 
 var recentUrl = 'https://api.bithumb.com/public/recent_transactions/{coinname}';
 var tickerUrl = 'https://api.bithumb.com/public/ticker/all';
-const intervalTime = 60 * 1000;
+var intervalTime;
 
 function Currency(key, name) {
   this.name = name;
@@ -44,27 +44,32 @@ function makeCurruncyInfo(cb) {
   });
 }
 function checkTicker(){
+  try{
+    request(tickerUrl, function(err, res, body){
+      try{
+        var result = JSON.parse(body);
 
-  request(tickerUrl, function(err, res, body){
-    try{
-      var result = JSON.parse(body);
+        for (var i = 0; i < currArr.length; i++){
+          var currency = currencyInfo[currArr[i]];
+          var key = currency.key;
+          currency.buyPrice = Number(result.data[key].buy_price);
+          currency.sellPrice = Number(result.data[key].sell_price);
+        }
 
-      for (var i = 0; i < currArr.length; i++){
-        var currency = currencyInfo[currArr[i]];
-        var key = currency.key;
-        currency.buyPrice = Number(result.data[key].buy_price);
-        currency.sellPrice = Number(result.data[key].sell_price);
+        checkStatus();
+        tickCount++;
+      } catch(e){
+        console.log(body);
+        console.log(e);
+        checkStatus();
+        tickCount++;
       }
+    })
+  } catch(e){
+    console.log(e);
+    checkTicker();
+  }
 
-      checkStatus();
-      tickCount++;
-    } catch(e){
-      console.log(body);
-      console.log(e);
-      checkStatus();
-      tickCount++;
-    }
-  })
 }
 
 function checkRecentTransaction(currency) {
@@ -105,9 +110,10 @@ function checkRecentTransaction(currency) {
         
         recentCount++;
         defaultStack++;
-        eventEmitter.emit('collected');
+       
         fs.writeFile('./logs/' +  key + '.txt', JSON.stringify(dataSet), 'utf8', (err) => {
-          if(err) console.log(err)
+          if(err) console.log(err);
+          eventEmitter.emit('collected');
         });
         
       } catch (e) {
@@ -152,16 +158,22 @@ function readData(){
 
   console.log('Data load Complete');
   checkTicker();
+  countDown(intervalTime / 1000);
 }
 
 function countDown(time){
   var count = time;
-  
+  if(timer) clearTimeout(timer);
   timer = setInterval(function(){
-    time--;
-    console.log(time);
+    count--;
+
+    if(count < 10 || count % 10 == 0){
+      console.log('next collect : after '+ count +'s');
+    } 
+    
   }, 1000);
   if(count == 0){
+
     clearTimeout(timer);
   }
 }
@@ -171,8 +183,9 @@ eventEmitter.on('collected', function() {
     recentCount = 0;
     tickCount = 0;
     console.log(stack + ' data Collected');
+    common.emit('collected0');
     setTimeout(function(){
-      countDown();
+      countDown(intervalTime / 1000);
       checkTicker()
     }, intervalTime);
   }
@@ -184,7 +197,9 @@ eventEmitter.on('inited', function() {
 });
 
 module.exports = {
-  init: function(){
+  init: function(event, interval){
+    common = event;
+    intervalTime = interval;
     makeCurruncyInfo(function() {
       eventEmitter.emit('inited');
     });
