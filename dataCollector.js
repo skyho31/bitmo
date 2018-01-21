@@ -171,8 +171,7 @@ function countDown(time){
     } 
     
   }, 1000);
-  if(count == 0){
-
+  if(count <= 0){
     clearTimeout(timer);
   }
 }
@@ -184,8 +183,8 @@ eventEmitter.on('collected', function() {
     console.log(stack + ' data Collected');
     common.emit('collected0');
     setTimeout(function(){
+      checkTicker();
       countDown(intervalTime / 1000);
-      checkTicker()
     }, intervalTime);
   }
 });

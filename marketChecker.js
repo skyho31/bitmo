@@ -16,14 +16,14 @@ function Currency(key){
 function getMarketInfo(){
 
   var curDate = new Date().getTime();
-  var dateLen = String(curDate).length;
-  if(dateLen < 13) {
-    var remainNum = 13 - dateLen;
+  var curDateStr = String(curDate);
+  if(curDateStr.length < 13) {
+    var remainNum = 13 - curDateStr.length;
     for(var i = 0; i < remainNum; i++){
-      curDate += '0';
+      curDateStr += '0';
     }
   } 
-  marketurl = 'https://www.bithumb.com/resources/csv/market_sise.json?_=' + curDate;
+  marketurl = 'https://www.bithumb.com/resources/csv/market_sise.json?_=' + curDateStr;
 
   var requestMarket = function(marketurl){
     request(marketurl, 'utf8', function(err, res, body){
