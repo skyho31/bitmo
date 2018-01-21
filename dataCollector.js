@@ -165,11 +165,9 @@ function countDown(time){
   if(timer) clearTimeout(timer);
   timer = setInterval(function(){
     count--;
-
     if(count < 10 || count % 10 == 0){
       console.log('next collect : after '+ count +'s');
     } 
-    
   }, 1000);
   if(count <= 0){
     clearTimeout(timer);
@@ -177,7 +175,7 @@ function countDown(time){
 }
 
 eventEmitter.on('collected', function() {
-  if (recentCount >= currArr.length && tickCount == 1) {
+  if (recentCount >= currArr.length && tickCount >= 1) {
     recentCount = 0;
     tickCount = 0;
     console.log(stack + ' data Collected');
