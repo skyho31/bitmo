@@ -181,6 +181,7 @@ eventEmitter.on('collected', function() {
     console.log(stack + ' data Collected');
     common.emit('collected0');
     setTimeout(function(){
+      if(timer) clearTimeout(timer);
       checkTicker();
       countDown(intervalTime / 1000);
     }, intervalTime);
