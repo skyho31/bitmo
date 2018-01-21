@@ -66,10 +66,9 @@ function checkTicker(){
       }
     })
   } catch(e){
-    console.log(e);
+    console.log('try after next time..' + e);
     checkTicker();
   }
-
 }
 
 function checkRecentTransaction(currency) {
