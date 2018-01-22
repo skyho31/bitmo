@@ -89,7 +89,7 @@ function checkRecentTransaction(currency) {
         curPrice = Number(result.data[0].price);
         price.push(curPrice);
 
-        if(price.length > 1000){
+        if(price.length > 2000){
           var temp = price.shift();
         }
 
@@ -100,7 +100,7 @@ function checkRecentTransaction(currency) {
         }
 
         if(key == 'BTC'){
-          if(stack >= 1000){
+          if(stack >= 2000){
             stack++;
           } else {
             stack = price.length;
