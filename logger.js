@@ -1,21 +1,21 @@
 var fs = require('fs');
 
 function write(speaker, message, isAppendable) {
-  var str = `[${speaker}] : ${message}`;
+  //var str = `[${speaker}] : ${message}`;
   var filename = './logs/' + speaker + '.txt';
 
   // console.log(str);
 
   if (!isAppendable) {
     
-    fs.writeFile(filename, str, (err) => {
+    fs.writeFile(filename, message, (err) => {
       if (err) console.log(err);
       // console.log('The file has been saved');
     });
   } else {
-    fs.appendFile(filename, str, (err) => {
+    fs.appendFile(filename, message, (err) => {
       if (err) {
-        fs.writeFile(filename, str, (err) => {
+        fs.writeFile(filename, message, (err) => {
           if (err) console.log(err);
           // console.log('The file has been saved');
         });
