@@ -14,6 +14,7 @@ var defaultStack = 0;
 var timer;
 var now;
 var common;
+var countNumber = 0;
 
 
 var recentUrl = 'https://api.bithumb.com/public/recent_transactions/{coinname}';
@@ -56,13 +57,14 @@ function checkTicker(){
           currency.sellPrice = Number(result.data[key].sell_price);
         }
 
-        checkStatus();
         tickCount++;
+        checkStatus();
       } catch(e){
         console.log(body);
         console.log(e);
-        checkStatus();
+
         tickCount++;
+        checkStatus();
       }
     })
   } catch(e){
@@ -116,6 +118,7 @@ function checkRecentTransaction(currency) {
         });
         
       } catch (e) {
+        console.log(e);
         recentCount++;
         console.log('restart server........')
         eventEmitter.emit('collected');
@@ -123,6 +126,7 @@ function checkRecentTransaction(currency) {
     });
   }
   catch(e){
+    console.log(e);
     recentCount++;
     console.log('restart server........')
     eventEmitter.emit('collected');
@@ -168,10 +172,11 @@ function countDown(time){
     if(count < 10 || count % 10 == 0){
       console.log('next collect : after '+ count +'s');
     } 
+    if(count <= 0){
+      clearTimeout(timer);
+    }
   }, 1000);
-  if(count <= 0){
-    clearTimeout(timer);
-  }
+
 }
 
 eventEmitter.on('collected', function() {
@@ -187,6 +192,10 @@ eventEmitter.on('collected', function() {
     }, intervalTime);
   }
 });
+
+eventEmitter.on('countDown', () => {
+
+})
 
 eventEmitter.on('inited', function() {
   console.log('inited');
