@@ -14,7 +14,7 @@ var defaultStack = 0;
 var timer;
 var now;
 var common;
-var countNumber = 0;
+var dataLimit = 5500;
 
 
 var recentUrl = 'https://api.bithumb.com/public/recent_transactions/{coinname}';
@@ -88,10 +88,20 @@ function checkRecentTransaction(currency) {
       try {
         var result = JSON.parse(body);
         // api 변경 시 바꾸어줘야함
-        curPrice = Number(result.data[0].price);
+        var priceArr = [];
+        for(var i = 0; i < 3; i++){
+          priceArr.push(Number(result.data[i].price));
+        }
+
+        priceArr.sort((a,b) => {
+          if(a > b) return a;
+        });
+
+        curPrice = Math.floor((priceArr[0] + priceArr[1])/2);
+        //curPrice = Number(result.data[0].price);
         price.push(curPrice);
 
-        if(price.length > 2000){
+        if(price.length > dataLimit){
           var temp = price.shift();
         }
 
@@ -102,7 +112,7 @@ function checkRecentTransaction(currency) {
         }
 
         if(key == 'BTC'){
-          if(stack >= 2000){
+          if(stack >= dataLimit){
             stack++;
           } else {
             stack = price.length;
@@ -193,9 +203,6 @@ eventEmitter.on('collected', function() {
   }
 });
 
-eventEmitter.on('countDown', () => {
-
-})
 
 eventEmitter.on('inited', function() {
   console.log('inited');
