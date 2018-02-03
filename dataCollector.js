@@ -48,6 +48,10 @@ function checkTicker(){
   try{
     request(tickerUrl, function(err, res, body){
       try{
+        if(body.status == 0000){
+          throw err;
+        }
+        
         var result = JSON.parse(body);
 
         for (var i = 0; i < currArr.length; i++){
