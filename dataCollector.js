@@ -48,7 +48,7 @@ function checkTicker(){
   try{
     request(tickerUrl, function(err, res, body){
       try{
-        if(body.status == 0000){
+        if(err || body.indexOf("status") === -1){
           throw err;
         }
         
@@ -90,6 +90,9 @@ function checkRecentTransaction(currency) {
   try {
     request(localUrl, function(err, res, body) {
       try {
+        if(err || body.indexOf("status") === -1 || body.indexOf("0000") === -1){
+          throw err;
+        }
         var result = JSON.parse(body);
         // api 변경 시 바꾸어줘야함
         var priceArr = [];
@@ -132,7 +135,7 @@ function checkRecentTransaction(currency) {
         });
         
       } catch (e) {
-        console.log(e);
+        //console.log(e);
         recentCount++;
         console.log('restart server........')
         eventEmitter.emit('collected');

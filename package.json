@@ -5,6 +5,7 @@
   "main": "index.js",
   "dependencies": {
     "colors": "^1.1.2",
+    "express": "^4.16.2",
     "forever": "^0.15.3",
     "macd": "^1.0.2",
     "request": "^2.83.0"
