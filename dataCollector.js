@@ -178,7 +178,7 @@ function readData(){
 
   console.log('Data load Complete');
   checkTicker();
-  // countDown(intervalTime / 1000);
+  countDown(intervalTime / 1000);
 }
 
 function countDown(time){
@@ -205,7 +205,7 @@ eventEmitter.on('collected', function() {
     setTimeout(function(){
       if(timer) clearTimeout(timer);
       checkTicker();
-     // countDown(intervalTime / 1000);
+      countDown(intervalTime / 1000);
     }, intervalTime);
   }
 });
