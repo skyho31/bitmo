@@ -14,7 +14,7 @@ var defaultStack = 0;
 var timer;
 var now;
 var common;
-var dataLimit = 5500;
+var dataLimit = 8000;
 
 
 var recentUrl = 'https://api.bithumb.com/public/recent_transactions/{coinname}';
